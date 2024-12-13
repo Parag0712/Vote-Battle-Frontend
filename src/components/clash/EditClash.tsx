@@ -1,11 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { CalendarIcon } from "lucide-react";
 import { Button } from "../ui/button";
@@ -23,16 +22,31 @@ import {
 import axios, { AxiosError } from "axios";
 import { CLASH_URL } from "@/lib/apiEndPoints";
 import { toast } from "sonner";
-import { ClashFormType ,ClashFormErrorType} from "@/types";
+import { ClashFormErrorType } from "@/types";
+import { ClashType } from "@/types";
+import { ClashFormType } from "@/types";
 import { clearCache } from "@/app/actions/clearCache";
-import { CustomUser } from "@/app/api/auth/[...nextauth]/option";
 
-export default function AddClash({ user }: { user: CustomUser }) {
-  const [open, setOpen] = useState(false);
+export default function AddClash({
+  token,
+  clash,
+  open,
+  setOpen,
+}: {
+  token: string;
+  clash: ClashType;
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}) {
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [date, setDate] = React.useState<Date | null>();
-  const [clashData, setClashData] = useState<ClashFormType>({});
+  const [date, setDate] = React.useState<Date | null>(
+    new Date(clash.expire_at)
+  );
+  const [clashData, setClashData] = useState<ClashFormType>({
+    title: clash.title,
+    description: clash?.description ?? "",
+  });
   const [errors, setErrors] = useState<ClashFormErrorType>();
   const handleImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -51,9 +65,9 @@ export default function AddClash({ user }: { user: CustomUser }) {
       formData.append("expire_at", date?.toISOString() ?? "");
       if (image) formData.append("image", image);
 
-      const { data } = await axios.post(CLASH_URL, formData, {
+      const { data } = await axios.put(`${CLASH_URL}/${clash.id}`, formData, {
         headers: {
-          Authorization: user.token,
+          Authorization: token,
         },
       });
       setLoading(false);
@@ -65,7 +79,6 @@ export default function AddClash({ user }: { user: CustomUser }) {
         setOpen(false);
       }
     } catch (error) {
-      console.log("The error is ", error);
       setLoading(false);
       if (error instanceof AxiosError) {
         if (error.response?.status === 422) {
@@ -79,15 +92,12 @@ export default function AddClash({ user }: { user: CustomUser }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Create Clash</Button>
-      </DialogTrigger>
       <DialogContent
         onInteractOutside={(e) => e.preventDefault()}
         className="xl:max-h-[95vh] overflow-y-auto"
       >
         <DialogHeader>
-          <DialogTitle>Create Clash</DialogTitle>
+          <DialogTitle>Edit Clash</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="mt-4">
@@ -140,7 +150,7 @@ export default function AddClash({ user }: { user: CustomUser }) {
                 <Calendar
                   mode="single"
                   selected={date ?? new Date()}
-                  onSelect={setDate}
+                  onSelect={(date) => setDate(date!)}
                   initialFocus
                 />
               </PopoverContent>
