@@ -33,7 +33,7 @@ export default function ClashCard({clash,token}:{
     </CardContent>
     <CardFooter className="space-x-4">
       <Link href={`/clash/items/${clash.id}`}>
-        <Button  type="button">Items</Button>
+        <Button  type="button">Vote</Button>
       </Link>
     </CardFooter>
   </Card>

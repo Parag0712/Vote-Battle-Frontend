@@ -25,6 +25,9 @@ export async function fetchClashs(token: string) {
 
 export async function fetchClash(token: string, id: number) {
     const res = await fetch(`${CLASH_URL}/${id}`, {
+        headers: {
+            Authorization: token,
+        },
         cache: "no-cache",
     });
 

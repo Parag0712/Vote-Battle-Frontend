@@ -9,4 +9,4 @@ export const CHECK_CREDENTIALS_URL = `${BASE_URL}/auth/check/credentials`;
 
 // CLASH PROJECT
 export const CLASH_URL = BASE_URL + "/clash";
-export const CLASH_ITEM_URL = BASE_URL + "/api/clash/items";
+export const CLASH_ITEM_URL = BASE_URL + "/clash/items";
